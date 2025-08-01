@@ -6,6 +6,7 @@ import { SubcontractorDto, UpdateSubcontractorDto } from 'app/views/Models/Subco
 import { SubcontractorService } from 'app/shared/services/subcontractor.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout'
 
 @Component({
   selector: 'app-sub-contractor',
@@ -36,7 +37,8 @@ export class SubContractorComponent implements OnInit {
     // password:null
   }
 
-  constructor(private fb: FormBuilder, private empservice: UserService, private _snackBar: MatSnackBar,
+    gridCols = 2;
+  constructor(private fb: FormBuilder,private breakpointObserver: BreakpointObserver, private empservice: UserService, private _snackBar: MatSnackBar,
     private depservice: DepartmentService, private subcservice: SubcontractorService,
     @Optional() @Inject(MAT_DIALOG_DATA) public data: any[],) {
     this.spinner = true;
@@ -54,6 +56,11 @@ export class SubContractorComponent implements OnInit {
 
   ngOnInit(): void {
 
+    this.breakpointObserver.observe(['(max-width: 599px)']) // 👈 custom mobile-only query
+      .subscribe(result => {
+        this.gridCols = result.matches ? 1 : 2;
+      });
+
     if (this.data != null && this.data["editform"] == true) {
       this.Editform = true;
       var deptarr = this.data["payload"]["departId"];
@@ -64,7 +71,7 @@ export class SubContractorComponent implements OnInit {
       this.croppedImage = this.data["payload"]["logo"];
       this.updatesubcontr.logo = "";
 
-      this.editcroppedImage = "https://beam.safesiteworks.com/beamapi/services/subcontractor/images/" + this.data["payload"]["logo"];
+      this.editcroppedImage = "https://beam.safesiteworks.com/commissioning/beamapi/services/subcontractor/images/" + this.data["payload"]["logo"];
     }
   }
   csvInputChange(fileInputEvent: any) {
@@ -83,7 +90,7 @@ export class SubContractorComponent implements OnInit {
       this.upload_imgsty = "uploadimgsty-no-img";
       if (this.Editform == true) {
         this.upload_imgsty = "uploadimgsty";
-        this.editcroppedImage = "https://safesiteworksbeam.online/beamapi/services/subcontractor/images/" + this.data["payload"]["logo"];
+        this.editcroppedImage = "https://beam.safesiteworks.com/commissioning/beamapi/services/subcontractor/images/" + this.data["payload"]["logo"];
         this.croppedImage = "";
       }
       else {

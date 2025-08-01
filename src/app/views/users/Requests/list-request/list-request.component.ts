@@ -44,6 +44,7 @@ import { EditRequestComponent } from '../edit-request/edit-request.component';
 import { config } from 'config';
 import { number } from 'ngx-custom-validators/src/app/number/validator';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { ConfirmationDialogComponent } from '../../confirmation-component/confirmation-component';
 
 interface Building {
   buildingId: number;
@@ -317,6 +318,10 @@ export class ListRequestComponent implements OnInit {
       Statusname: 'Draft',
     },
     {
+      Statusid: 'Pre-Approved',
+      Statusname: 'Pre-Approved',
+    },
+    {
       Statusid: 'Approved',
       Statusname: 'Approved',
     },
@@ -405,7 +410,21 @@ export class ListRequestComponent implements OnInit {
     this.requestservice.SelectedRequestData = {};
   }
 
-  ngOnInit() {    
+  ngOnInit() {
+    this.userdata = this.jwtauth.getUser();
+    console.log(this.userdata);
+    this.approvalUsers = this.userdata.role.split(',');
+    if(this.approvalUsers.includes('Department') && !this.approvalUsers.includes('Department1')) {
+      this.firstApproval = true;
+    } else if(this.approvalUsers.includes('Department1') && !this.approvalUsers.includes('Department')) {
+      this.secondApproval =true;
+    } else if((this.approvalUsers.includes('Department') && this.approvalUsers.includes('Department1')) || this.approvalUsers.includes('Admin')) {
+      this.bothApproval = true;
+    } else {
+      this.firstApproval = true;
+      this.secondApproval =true;
+      this.bothApproval = true;
+    }
    
     this.breakpointObserver.observe([
       Breakpoints.XSmall,
@@ -471,6 +490,8 @@ export class ListRequestComponent implements OnInit {
     this.initializeData();
     this.setupFilterListeners();
   }
+
+
       private initializeData(): void {
     const buildingData = this.requestservice.bulidingDataWithIds() as Building[];
     this.Buildings = buildingData;
@@ -599,7 +620,7 @@ private filterRooms(buildingIds: number[], levels: string[]): RoomGroup[] {
         this.Filtertab = true;
         this.userdata = this.jwtauth.getUser();
 
-        if (this.userdata['role'] == 'Subcontractor') {
+        if (this.userdata['role'].includes('Subcontractor')) {
           this.isoperator = false;
           this.IsNotSubCntr = false;
           this.IsNotASubCntr = false;
@@ -615,11 +636,10 @@ private filterRooms(buildingIds: number[], levels: string[]): RoomGroup[] {
           // });
           this.paginationCount = res[1].count;
           console.log(this.paginationCount);
-        } else if (this.userdata['role'] == 'Admin') {
+        } else if (this.userdata['role'].includes('Admin')) {
           this.IsNotSubCntr = true;
           this.IsNotASubCntr = true;
           this.items = res[0]['data'];
-          this.isoperator = true;
           this.isoperator = true;
           var filteritems = [];
           this.items.forEach((x) => {
@@ -634,7 +654,7 @@ private filterRooms(buildingIds: number[], levels: string[]): RoomGroup[] {
           this.paginationCount = res[1].count;
           console.log(this.paginationCount);
         } 
-        else if (this.userdata['role'] == 'Department') {
+        else if (this.userdata['role'].includes('Department') || this.userdata['role'].includes('Department1')) {
           this.IsNotSubCntr = false;
           this.IsNotASubCntr = true;
           this.items = res[0]['data'];
@@ -651,7 +671,7 @@ private filterRooms(buildingIds: number[], levels: string[]): RoomGroup[] {
           // this.items.length = 0;
           // this.items = filteritems;
         }
-        else if (this.userdata['role'] == 'Observer') {
+        else if (this.userdata['role'].includes('Observer')) {
           this.IsNotSubCntr = false;
           this.IsNotASubCntr = true;
           this.items = res[0]['data'];
@@ -708,7 +728,7 @@ private filterRooms(buildingIds: number[], levels: string[]): RoomGroup[] {
         this.Filtertab = true;
         this.userdata = this.jwtauth.getUser();
 
-        if (this.userdata['role'] == 'Subcontractor') {
+        if (this.userdata['role'].includes('Subcontractor')) {
           this.isoperator = false;
           this.IsNotSubCntr = false;
           this.RequestlistForm.controls['Contractor'].setValue(
@@ -720,10 +740,9 @@ private filterRooms(buildingIds: number[], levels: string[]): RoomGroup[] {
             .subscribe((res) => {
               this.items = res['data'];
             });
-        } else if (this.userdata['role'] == 'Admin') {
+        } else if (this.userdata['role'].includes('Admin')) {
           this.IsNotSubCntr = true;
           this.items = res[0]['data'];
-          this.isoperator = true;
           this.isoperator = true;
           var filteritems = [];
           this.items.forEach((x) => {
@@ -734,7 +753,7 @@ private filterRooms(buildingIds: number[], levels: string[]): RoomGroup[] {
           this.items = [];
           this.items.length = 0;
           this.items = filteritems;
-        } else if (this.userdata['role'] == 'Department') {
+        } else if (this.userdata['role'].includes('Department1') || this.userdata['role'].includes('Department')) {
           this.IsNotSubCntr = true;
           this.items = res[0]['data'];
           this.isoperator = true;
@@ -1063,7 +1082,7 @@ this.SearchRequest.area = formattedArea || "";
   CopyRequest(row, status) {
     if (status == 'Closed') {
       row['Request_status'] = 'Hold';
-      let currentdate = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
+      let currentdate = config.getDenmarkTime.date();
       row['Request_Date'] = currentdate;
     }
     if (status == 'Draft') {
@@ -1100,9 +1119,147 @@ this.SearchRequest.area = formattedArea || "";
     });
   }
 
+  // ChangeStaus(row) {
+  //   let title = 'Request Status Change ';
+  //   let type;
+  //   if((this.firstApproval || this.bothApproval) && row.Request_status == 'Hold') {
+  //     type = 'operartor';
+  //   } else if((this.secondApproval || this.bothApproval) && row.Request_status == 'Pre-Approved') {
+  //     type = 'operartor';
+  //   } else {
+  //     type = '';
+  //   }
+    
+  //   console.log(row);
+  //   let dialogRef: MatDialogRef<any> = this.dialog.open(
+  //     StatusChangeDialogComponent,
+  //     {
+  //       width: '600px',
+  //       height: '300px',
+  //       disableClose: false,
+  //       data: {
+  //         title: title,
+  //         payload: row,
+  //         type: type,
+  //         pagedatainfo: this.pagedatainfo,
+  //       },
+  //     }
+  //   );
+  //   dialogRef.afterClosed().subscribe((res) => {
+  //     if (this.api == 'SearchRequest') {
+  //       console.log("search API");
+  //       // this.api = 'SearchRequest';
+  //       // this.items = res[0]['data'];
+  //       // this.paginationCount = res[1]['count'];
+  //       const mainValue = this.currentPage - 1;
+  //       this.startValue = mainValue * 30 + 1;
+  //       this.search(event);
+  //       console.log("NUMMBER", this.currentPage)
+  //       console.log("Start Value", this.startValue)
+  //     }
+  //     else {
+  //       const mainValue = this.currentPage - 1;
+  //       this.startValue = mainValue * 30 + 1;
+  //       this.getPermits(this.currentPage, this.startValue);
+  //       console.log("NUMMBER", this.currentPage)
+  //       console.log("Start Value", this.startValue)
+  //       // window.location.reload();
+  //     }
+  //     // this.requestservice.listpagination(this.pagedatainfo).subscribe((x) => {
+  //       // console.log('New Req List', x);
+  //       // const mainValue = this.currentPage - 1;
+  //       // this.startValue = mainValue * 30 + 1 ;
+  //       // this.getPermits(this.currentPage, this.startValue);
+  //       // console.log("NUMMBER", this.currentPage)
+  //       // console.log("Start Value", this.startValue)
+  //       // this.openSnackBar("Request Status Updated Successfully");
+  //       // window.location.reload();
+  //     // });
+  //   });
+  // }
+
+    openSnackBar(msg) {
+    this.snack.open(msg, "Close");
+  }
+
   ChangeStaus(row) {
+    const splitingAreas = row.Room_Nos.split(",");
+    const formattedArea = splitingAreas
+  .filter(val => val !== null && val !== undefined && val !== '') 
+  .map((val: string) => `${val}`)
+  .join('|');
+    // First check if there are existing permits with the same room and working date
+    const searchCheckRequest = {
+      Room_Type: `'${row.Room_Type}'`,
+      fromDate: this.datePipe.transform(row.Working_Date, 'yyyy-MM-dd'),
+      toDate: this.datePipe.transform(row.Working_Date, 'yyyy-MM-dd'),
+      Start: '1',
+      End: '5', // We just need to know if any records exist
+      Page: '1',
+      Site_Id: '5',
+      Building_Id:`'${row.Building_Id}'`,
+      Sub_Contractor_Id:`'${row.Sub_Contractor_Id}'`,
+      Type_Of_Activity_Id:`'${row.Type_Of_Activity_Id}'`,
+      Request_status: "'Hold','Pre-Approved','Approved','Opened'",
+      PermitNo:'',
+      Activity:'',
+      hras: '',
+      taskSpecificPPE: '',
+      area: formattedArea,
+    };
+
+    this.requestservice.SearchRequest(searchCheckRequest).subscribe((res) => {
+      if (res['message'] != 'No Requests Found' && res[0]['data'].length > 1) {
+        // Show confirmation dialog if permits exist
+        const confirmDialog = this.dialog.open(ConfirmationDialogComponent, {
+          width: '400px',
+          data: {
+            title: 'Duplicate Permit Found',
+            message: 'A permit already exists for this room and working date. Do you want to continue?'
+          }
+        });
+
+        confirmDialog.afterClosed().subscribe(confirmed => {
+          if (confirmed) {
+            this.proceedWithStatusChange(row);
+          }
+          // If not confirmed, do nothing (dialog will close)
+        });
+      } else {
+        // No duplicates found, proceed directly
+        this.proceedWithStatusChange(row);
+      }
+    });
+}
+
+proceedWithStatusChange(row) {
     let title = 'Request Status Change ';
-    let type = 'operartor';
+    let type;
+    if ((this.firstApproval || this.bothApproval) && row.Request_status == 'Hold' && row.permit_type === 'Commissioning') {
+      type = 'operartor';
+    } else if ((this.secondApproval || this.bothApproval) && row.Request_status == 'Pre-Approved' && row.permit_type === 'Commissioning') {
+      type = 'operartor';
+    } else if((this.firstApproval || this.secondApproval || this.bothApproval)&&row.Request_status == 'Hold' && row.permit_type !== 'Commissioning') {
+      type = 'operartor';
+    } else {
+      type = '';
+    }
+
+    // if(row.permit_type == 'Commissioning') {
+    //   if(row.Request_status == 'Hold') {
+    //     type = this.firstApproval || this.bothApproval ? 'operartor' : '';
+    //   } else if(row.Request_status == 'Pre-Approved') {
+    //     type = this.secondApproval || this.bothApproval ? 'operartor' : '';
+    //   }
+    // }
+
+    if(this.firstApproval && !this.secondApproval && row.permit_type == 'Commissioning' && row.Request_status == 'Pre-Approved') {
+      return this.openSnackBar("Can't have access to final approval. Please ask COMM person to approve it.");
+    }
+    if(!this.firstApproval && this.secondApproval && row.permit_type == 'Commissioning' && row.Request_status == 'Hold') {
+      return this.openSnackBar("Can't have access to initial approval. Please ask CONM person to pre-approve it.");
+    } else {
+    
     console.log(row);
     let dialogRef: MatDialogRef<any> = this.dialog.open(
       StatusChangeDialogComponent,
@@ -1118,38 +1275,26 @@ this.SearchRequest.area = formattedArea || "";
         },
       }
     );
+    
     dialogRef.afterClosed().subscribe((res) => {
       if (this.api == 'SearchRequest') {
         console.log("search API");
-        // this.api = 'SearchRequest';
-        // this.items = res[0]['data'];
-        // this.paginationCount = res[1]['count'];
         const mainValue = this.currentPage - 1;
         this.startValue = mainValue * 30 + 1;
         this.search(event);
         console.log("NUMMBER", this.currentPage)
         console.log("Start Value", this.startValue)
-      }
-      else {
+      } else {
         const mainValue = this.currentPage - 1;
         this.startValue = mainValue * 30 + 1;
         this.getPermits(this.currentPage, this.startValue);
         console.log("NUMMBER", this.currentPage)
         console.log("Start Value", this.startValue)
-        // window.location.reload();
       }
-      // this.requestservice.listpagination(this.pagedatainfo).subscribe((x) => {
-        // console.log('New Req List', x);
-        // const mainValue = this.currentPage - 1;
-        // this.startValue = mainValue * 30 + 1 ;
-        // this.getPermits(this.currentPage, this.startValue);
-        // console.log("NUMMBER", this.currentPage)
-        // console.log("Start Value", this.startValue)
-        // this.openSnackBar("Request Status Updated Successfully");
-        // window.location.reload();
-      // });
     });
   }
+}
+
   ChangeStausbysubcontractor(row, status) {
     console.log(config.Denmarktz.split(' '));
     const [currentDenmarkDate, currentDenmarkTime] = [
@@ -1160,7 +1305,7 @@ this.SearchRequest.area = formattedArea || "";
     let title = 'Request Status Change ';
     let type = status;
     if (status == 'Opened') {
-      var currentdate = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
+      var currentdate = config.getDenmarkTime.date();
       var mydate = this.datePipe.transform(row['Working_Date'], 'yyyy-MM-dd');
       if (currentdate === mydate) {
         let dialogRef: MatDialogRef<any> = this.dialog.open(
@@ -1494,7 +1639,7 @@ this.SearchRequest.area = formattedArea || "";
           this.Filtertab = true;
           this.userdata = this.jwtauth.getUser();
 
-          if (this.userdata['role'] == 'Subcontractor') {
+          if (this.userdata['role'].includes('Subcontractor')) {
             // this.isoperator = false;
             // this.IsNotSubCntr = false;
             this.isoperator = false;
@@ -1511,12 +1656,11 @@ this.SearchRequest.area = formattedArea || "";
             // });
             this.paginationCount = res[1].count;
             console.log(this.paginationCount);
-          } else if (this.userdata['role'] == 'Admin') {
+          } else if (this.userdata['role'].includes('Admin')) {
             // this.IsNotSubCntr = true;
             this.IsNotSubCntr = true;
             this.IsNotASubCntr = true;
             this.items = res[0]['data'];
-            this.isoperator = true;
             this.isoperator = true;
             var filteritems = [];
             this.items.forEach((x) => {
@@ -1527,7 +1671,7 @@ this.SearchRequest.area = formattedArea || "";
 
             this.paginationCount = res[1].count;
             console.log(this.paginationCount);
-          } else if (this.userdata['role'] == 'Department') {
+          } else if (this.userdata['role'].includes('Department1') || this.userdata['role'].includes('Department')) {
             // this.IsNotSubCntr = true;
             this.IsNotSubCntr = false;
             this.IsNotASubCntr = true;
@@ -1542,7 +1686,7 @@ this.SearchRequest.area = formattedArea || "";
             this.items = [];
             this.items.length = 0;
             this.items = filteritems;
-          }else if (this.userdata['role'] == 'Observer') {
+          }else if (this.userdata['role'].includes('Observer')) {
             // this.IsNotSubCntr = true;
             this.IsNotSubCntr = false;
             this.IsNotASubCntr = true;
@@ -1639,7 +1783,7 @@ this.SearchRequest.area = formattedArea || "";
           this.Filtertab = true;
           this.userdata = this.jwtauth.getUser();
 
-          if (this.userdata['role'] == 'Subcontractor') {
+          if (this.userdata['role'].includes('Subcontractor')) {
             // this.isoperator = false;
             // this.IsNotSubCntr = false;
             this.isoperator = false;
@@ -1656,12 +1800,11 @@ this.SearchRequest.area = formattedArea || "";
               // });
             this.paginationCount = res[1].count;
             console.log(this.paginationCount);
-          } else if (this.userdata['role'] == 'Admin') {
+          } else if (this.userdata['role'].includes('Admin')) {
             // this.IsNotSubCntr = true;
             this.IsNotSubCntr = true;
             this.IsNotASubCntr = true;
             this.items = res[0]['data'];
-            this.isoperator = true;
             this.isoperator = true;
             var filteritems = [];
             this.items.forEach((x) => {
@@ -1672,7 +1815,7 @@ this.SearchRequest.area = formattedArea || "";
 
             this.paginationCount = res[1].count;
             console.log(this.paginationCount);
-          } else if (this.userdata['role'] == 'Department') {
+          } else if (this.userdata['role'].includes('Department') || this.userdata['role'].includes('Department')) {
             // this.IsNotSubCntr = true;
             this.IsNotSubCntr = false;
             this.IsNotASubCntr = true;
@@ -1687,7 +1830,7 @@ this.SearchRequest.area = formattedArea || "";
             this.items = [];
             this.items.length = 0;
             this.items = filteritems;
-          }else if (this.userdata['role'] == 'Observer') {
+          }else if (this.userdata['role'].includes('Observer')) {
             this.IsNotSubCntr = false;
             this.IsNotASubCntr = true;
             this.items = res[0]?.['data'] || [];

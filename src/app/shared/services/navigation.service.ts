@@ -464,23 +464,23 @@ menuItems$:any={};
   constructor( public jwtAuth: JwtAuthService) {
     this.user=this.jwtAuth.getUser();
     
-    if(this.user["role"]=="Subcontractor")
+    if(this.user["role"].includes("Subcontractor"))
     {
       this.menuItems = new BehaviorSubject<IMenuItem[]>(this.UsericonMenu);
       this.menuItems$ = this.menuItems.asObservable();
     }
-    else  if(this.user["role"]=="Admin")
+    else  if(this.user["role"].includes("Admin"))
     {
       this.menuItems = new BehaviorSubject<IMenuItem[]>(this.AdminiconMenu);
       this.menuItems$ = this.menuItems.asObservable();
 
     }
-    else  if(this.user["role"]=="Department")
+    else  if(this.user["role"].includes("Department") || this.user["role"].includes("Department1"))
     {
       this.menuItems = new BehaviorSubject<IMenuItem[]>(this.OperatoriconMenu);
       this.menuItems$ = this.menuItems.asObservable();
     }
-    else  if(this.user["role"]=="Observer")
+    else  if(this.user["role"].includes("Observer"))
     {
       this.menuItems = new BehaviorSubject<IMenuItem[]>(this.ObservericonMenu);
       this.menuItems$ = this.menuItems.asObservable();

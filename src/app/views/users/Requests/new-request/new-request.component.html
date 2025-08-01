@@ -212,6 +212,16 @@
                   RAMSNumber</mat-error>
               </mat-form-field>
             </mat-grid-tile>
+            <mat-grid-tile>
+              <mat-form-field class="full-width" appearance="outline">
+                <mat-label>Permit Type</mat-label>
+                <mat-select formControlName="permit_type" name="permit_type" (selectionChange)="onPermitTypeChange()"
+                  [class.is-invalid]="RequestForm.get('permit_type').invalid && RequestForm.get('permit_type').touched">
+                  <mat-option value="Construction">Construction</mat-option>
+                  <mat-option value="Commissioning">Commissioning</mat-option>
+                  </mat-select>
+              </mat-form-field>
+            </mat-grid-tile>
             </mat-grid-list>
           <mat-grid-list cols="2" rowHeight="100px">
 
@@ -256,7 +266,7 @@ Add Files
                 
                 <div *ngIf="editform" class="editImagesscroll">
                   <div *ngFor="let file of images"class="editImagesClass">
-                    <a [href]="'https://beam.safesiteworks.com/m3infrastructure/beamapi/services/request/' + file.name" target="_blank">
+                    <a [href]="'https://beam.safesiteworks.com/commissioning/beamapi/services/request/' + file.name" target="_blank">
                       {{ file.name }}
                     </a>
                     <mat-icon class="icons-sty fileremoveclass" (click)="deleteRamsFile(file)">remove</mat-icon>
@@ -1263,7 +1273,7 @@ Add Files
                   </mat-radio-group>
                 </div>
 
-                <div class="hotwork-sub">
+                <div class="hotwork-sub"  *ngIf="shouldShowElectricianCert()">
                   <label>Does the people who will work with energised systems, had electrician certification?</label>
                   <mat-radio-group formControlName="floatLabel23"
                     [class.is-invalid]="RequestForm.get('floatLabel23').invalid && RequestForm.get('floatLabel23').touched">
@@ -1465,7 +1475,7 @@ Add Files
 
           <mat-grid-list cols="1" rowHeight="450" *ngIf="istestingyes">
             <mat-grid-tile>
-              <section class="cmsnum full-width">
+              <section class="cmsnum full-width"  *ngIf="shouldShowElectricianCert()">
                 <div class="hotwork-sub">
                   <label>Has there been an agreement on the transfer of plant/equipment for pressure testing?</label>
                   <mat-radio-group formControlName="floatLabel32"
@@ -1559,6 +1569,120 @@ Add Files
                     <mat-radio-button [value]="2">N/A</mat-radio-button>
                     <mat-error class="error-message"
                       *ngIf="RequestForm.get('floatLabel38').invalid && RequestForm.get('floatLabel38').touched">Please
+                      Select
+                    </mat-error>
+                  </mat-radio-group>
+                </div>
+
+              </section>
+              <section class="cmsnum full-width" *ngIf="!shouldShowElectricianCert()">
+                <div class="hotwork-sub">
+                  <label>Linewalk of the pipework/equipment done?</label>
+                  <mat-radio-group formControlName="floatLabel102"
+                    [class.is-invalid]="RequestForm.get('floatLabel102').invalid && RequestForm.get('floatLabel102').touched">
+                    <mat-radio-button [value]="1">Yes &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="0">No &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="2">N/A</mat-radio-button>
+                    <mat-error class="error-message"
+                      *ngIf="RequestForm.get('floatLabel102').invalid && RequestForm.get('floatLabel102').touched">Please
+                      Select
+                    </mat-error>
+                  </mat-radio-group>
+                </div>
+
+                <div class="hotwork-sub">
+                  <label>Pressure test is coordinated with NNE C&Q?</label>
+                  <mat-radio-group formControlName="floatLabel103"
+                    [class.is-invalid]="RequestForm.get('floatLabel103').invalid && RequestForm.get('floatLabel103').touched">
+                    <mat-radio-button [value]="1">Yes &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="0">No &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="2">N/A</mat-radio-button>
+                    <mat-error class="error-message"
+                      *ngIf="RequestForm.get('floatLabel103').invalid && RequestForm.get('floatLabel103').touched">Please
+                      Select
+                    </mat-error>
+                  </mat-radio-group>
+                </div>
+
+                <div class="hotwork-sub">
+                  <label>Is the pipework/equipment MIC? (Mechanical Installation Complete)?</label>
+                  <mat-radio-group formControlName="floatLabel104"
+                    [class.is-invalid]="RequestForm.get('floatLabel104').invalid && RequestForm.get('floatLabel104').touched">
+                    <mat-radio-button [value]="1">Yes &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="0">No &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="2">N/A</mat-radio-button>
+                    <mat-error class="error-message"
+                      *ngIf="RequestForm.get('floatLabel104').invalid && RequestForm.get('floatLabel104').touched">Please
+                      Select
+                    </mat-error>
+                  </mat-radio-group>
+                </div>
+
+                <div class="hotwork-sub">
+                  <label>LOTO plan attached to the work permit?</label>
+                  <mat-radio-group formControlName="floatLabel105"
+                    [class.is-invalid]="RequestForm.get('floatLabel105').invalid && RequestForm.get('floatLabel105').touched">
+                    <mat-radio-button [value]="1">Yes &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="0">No &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="2">N/A</mat-radio-button>
+                    <mat-error class="error-message"
+                      *ngIf="RequestForm.get('floatLabel105').invalid && RequestForm.get('floatLabel105').touched">Please
+                      Select
+                    </mat-error>
+                  </mat-radio-group>
+                </div>
+
+                <div class="hotwork-sub">
+                  <label>Is the exclusion zone calculated and layout attached to work permit?</label>
+                  <mat-radio-group formControlName="floatLabel106"
+                    [class.is-invalid]="RequestForm.get('floatLabel106').invalid && RequestForm.get('floatLabel106').touched">
+                    <mat-radio-button [value]="1">Yes &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="0">No &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="2">N/A</mat-radio-button>
+                    <mat-error class="error-message"
+                      *ngIf="RequestForm.get('floatLabel106').invalid && RequestForm.get('floatLabel106').touched">Please
+                      Select
+                    </mat-error>
+                  </mat-radio-group>
+                </div>
+
+                <div class="hotwork-sub">
+                  <label>Pneumatic or Hydrostatic?</label>
+                  <mat-radio-group formControlName="floatLabel107"
+                    [class.is-invalid]="RequestForm.get('floatLabel107').invalid && RequestForm.get('floatLabel107').touched">
+                    <mat-radio-button [value]="1">Yes &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="0">No &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="2">N/A</mat-radio-button>
+                    <mat-error class="error-message"
+                      *ngIf="RequestForm.get('floatLabel107').invalid && RequestForm.get('floatLabel107').touched">Please
+                      Select
+                    </mat-error>
+                  </mat-radio-group>
+                </div>
+
+                <div class="hotwork-sub">
+                  <label>Pressure of the test?</label>
+                  <mat-radio-group formControlName="floatLabel108"
+                    [class.is-invalid]="RequestForm.get('floatLabel108').invalid && RequestForm.get('floatLabel108').touched">
+                    <mat-radio-button [value]="1">Yes &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="0">No &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="2">N/A</mat-radio-button>
+                    <mat-error class="error-message"
+                      *ngIf="RequestForm.get('floatLabel108').invalid && RequestForm.get('floatLabel108').touched">Please
+                      Select
+                    </mat-error>
+                  </mat-radio-group>
+                </div>
+
+                <div class="hotwork-sub">
+                  <label>Safety Valves are calibrated and attached to the Pressure testing rig?</label>
+                  <mat-radio-group formControlName="floatLabel109"
+                    [class.is-invalid]="RequestForm.get('floatLabel109').invalid && RequestForm.get('floatLabel109').touched">
+                    <mat-radio-button [value]="1">Yes &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="0">No &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="2">N/A</mat-radio-button>
+                    <mat-error class="error-message"
+                      *ngIf="RequestForm.get('floatLabel109').invalid && RequestForm.get('floatLabel109').touched">Please
                       Select
                     </mat-error>
                   </mat-radio-group>
@@ -1946,7 +2070,7 @@ Add Files
 
           <!-- ATEXAREA START -->
 
-          <mat-grid-list cols="8" rowHeight="100px">
+          <!-- <mat-grid-list cols="8" rowHeight="100px">
             <mat-grid-tile colspan="1" class="hra-img-sec">
               <img src="assets/images/logos/ATEXarea.png" alt="HotWorks Logo" class="hra-img" />
             </mat-grid-tile>
@@ -1968,7 +2092,7 @@ Add Files
               </mat-form-field>
             </mat-grid-tile>
 
-          </mat-grid-list>
+          </mat-grid-list> -->
 
           <mat-grid-list cols="1" rowHeight="300" *ngIf="isAtexAreayes">
             <mat-grid-tile>
@@ -2504,6 +2628,279 @@ Add Files
           </mat-grid-list>
 
           <!-- Crane Lifting ends -->
+
+             <!-- Pressurization power on starts -->
+
+            <mat-grid-list cols="8" rowHeight="100px" *ngIf="!shouldShowElectricianCert()">
+            <mat-grid-tile colspan="1" class="hra-img-sec">
+              <img src="assets/images/logos/Craneslifting.png" alt="HotWorks Logo" class="hra-img" />
+            </mat-grid-tile>
+            <mat-grid-tile colspan="7">
+              <mat-form-field class="full-width" appearance="outline">
+                <mat-label>
+                  Energization of Electrical equipment(Power on)
+                </mat-label>
+                <mat-select
+                  (selectionChange)="GetselectedPoweronitem($event.value);setAndRemoveValidators($event.value,'Using Power on')"
+                  formControlName="Poweron" name="Poweron"
+                  [class.is-invalid]="RequestForm.get('Poweron').invalid && RequestForm.get('Poweron').touched">
+                  <mat-option *ngFor="let tech of CraneLifting" [value]="tech.id">
+                    {{ tech.CraneLiftingval }}
+                  </mat-option>
+                </mat-select>
+                <mat-error class="error-message"
+                  *ngIf="RequestForm.get('Poweron').invalid && RequestForm.get('Poweron').touched">Please
+                  Select
+                </mat-error>
+              </mat-form-field>
+            </mat-grid-tile>
+
+          </mat-grid-list>
+
+          <mat-grid-list cols="1" rowHeight="500" *ngIf="isPoweronyes && !shouldShowElectricianCert()">
+            <mat-grid-tile>
+              <section class="cmsnum full-width">
+                <div class="hotwork-sub">
+                  <label>Is the responsible for the area informed?</label>
+                  <mat-radio-group formControlName="floatLabel88"
+                    [class.is-invalid]="RequestForm.get('floatLabel88').invalid && RequestForm.get('floatLabel88').touched">
+                    <mat-radio-button [value]="1">Yes &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="0">No &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="2">N/A</mat-radio-button>
+                    <mat-error class="error-message"
+                      *ngIf="RequestForm.get('floatLabel88').invalid && RequestForm.get('floatLabel88').touched">Please
+                      Select
+                    </mat-error>
+                  </mat-radio-group>
+                </div>
+
+                <div class="hotwork-sub">
+                  <label>Do you have a risk assessment done?</label>
+                  <mat-radio-group formControlName="floatLabel89"
+                    [class.is-invalid]="RequestForm.get('floatLabel89').invalid && RequestForm.get('floatLabel89').touched">
+                    <mat-radio-button [value]="1">Yes &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="0">No &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="2">N/A</mat-radio-button>
+                    <mat-error class="error-message"
+                      *ngIf="RequestForm.get('floatLabel89').invalid && RequestForm.get('floatLabel89').touched">Please
+                      Select
+                    </mat-error>
+                  </mat-radio-group>
+                </div>
+
+                <div class="hotwork-sub">
+                  <label>Barriers & Signage in place?</label>
+                  <mat-radio-group formControlName="floatLabel90"
+                    [class.is-invalid]="RequestForm.get('floatLabel90').invalid && RequestForm.get('floatLabel90').touched">
+                    <mat-radio-button [value]="1">Yes &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="0">No &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="2">N/A</mat-radio-button>
+                    <mat-error class="error-message"
+                      *ngIf="RequestForm.get('floatLabel90').invalid && RequestForm.get('floatLabel90').touched">Please
+                      Select
+                    </mat-error>
+                  </mat-radio-group>
+                </div>
+
+                <div class="hotwork-sub">
+                  <label>Have all the cables that need to be energized been tested?</label>
+                  <mat-radio-group formControlName="floatLabel91"
+                    [class.is-invalid]="RequestForm.get('floatLabel91').invalid && RequestForm.get('floatLabel91').touched">
+                    <mat-radio-button [value]="1">Yes &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="0">No &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="2">N/A</mat-radio-button>
+                    <mat-error class="error-message"
+                      *ngIf="RequestForm.get('floatLabel91').invalid && RequestForm.get('floatLabel91').touched">Please
+                      Select
+                    </mat-error>
+                  </mat-radio-group>
+                </div>
+
+                <div class="hotwork-sub">
+                  <label>Have all punches been closed?</label>
+                  <mat-radio-group formControlName="floatLabel92"
+                    [class.is-invalid]="RequestForm.get('floatLabel92').invalid && RequestForm.get('floatLabel92').touched">
+                    <mat-radio-button [value]="1">Yes &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="0">No &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="2">N/A</mat-radio-button>
+                    <mat-error class="error-message"
+                      *ngIf="RequestForm.get('floatLabel92').invalid && RequestForm.get('floatLabel92').touched">Please
+                      Select
+                    </mat-error>
+                  </mat-radio-group>
+                </div>
+
+                <div class="hotwork-sub">
+                  <label>TOCT Checklist completed?</label>
+                  <mat-radio-group formControlName="floatLabel93"
+                    [class.is-invalid]="RequestForm.get('floatLabel93').invalid && RequestForm.get('floatLabel93').touched">
+                    <mat-radio-button [value]="1">Yes &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="0">No &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="2">N/A</mat-radio-button>
+                    <mat-error class="error-message"
+                      *ngIf="RequestForm.get('floatLabel93').invalid && RequestForm.get('floatLabel93').touched">Please
+                      Select
+                    </mat-error>
+                  </mat-radio-group>
+                </div>
+                <div class="hotwork-sub">
+                  <label>Have you Informed and Aligned with EL LOTO Team?</label>
+                  <mat-radio-group formControlName="floatLabel94"
+                    [class.is-invalid]="RequestForm.get('floatLabel94').invalid && RequestForm.get('floatLabel94').touched">
+                    <mat-radio-button [value]="1">Yes &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="0">No &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="2">N/A</mat-radio-button>
+                    <mat-error class="error-message"
+                      *ngIf="RequestForm.get('floatLabel94').invalid && RequestForm.get('floatLabel94').touched">Please
+                      Select
+                    </mat-error>
+                  </mat-radio-group>
+                </div>
+              </section>
+            </mat-grid-tile>
+
+
+          </mat-grid-list>
+
+          <!-- Pressurization power on ends -->
+
+
+          <!-- Pressurization starts -->
+
+            <mat-grid-list cols="8" rowHeight="100px" *ngIf="!shouldShowElectricianCert()">
+            <mat-grid-tile colspan="1" class="hra-img-sec">
+              <img src="assets/images/logos/Craneslifting.png" alt="HotWorks Logo" class="hra-img" />
+            </mat-grid-tile>
+            <mat-grid-tile colspan="7">
+              <mat-form-field class="full-width" appearance="outline">
+                <mat-label>
+                  Energization of Mechanical equipment(Pressurization)
+                </mat-label>
+                <mat-select
+                  (selectionChange)="GetselectedPressurizationitem($event.value);setAndRemoveValidators($event.value,'Using Pressurization')"
+                  formControlName="Pressurization" name="Pressurization"
+                  [class.is-invalid]="RequestForm.get('Pressurization').invalid && RequestForm.get('Pressurization').touched">
+                  <mat-option *ngFor="let tech of CraneLifting" [value]="tech.id">
+                    {{ tech.CraneLiftingval }}
+                  </mat-option>
+                </mat-select>
+                <mat-error class="error-message"
+                  *ngIf="RequestForm.get('Pressurization').invalid && RequestForm.get('Pressurization').touched">Please
+                  Select
+                </mat-error>
+              </mat-form-field>
+            </mat-grid-tile>
+
+          </mat-grid-list>
+
+          <mat-grid-list cols="1" rowHeight="500" *ngIf="isPressurizationyes && !shouldShowElectricianCert()">
+            <mat-grid-tile>
+              <section class="cmsnum full-width">
+                <div class="hotwork-sub">
+                  <label>Pressure test performed and approved?</label>
+                  <mat-radio-group formControlName="floatLabel95"
+                    [class.is-invalid]="RequestForm.get('floatLabel95').invalid && RequestForm.get('floatLabel95').touched">
+                    <mat-radio-button [value]="1">Yes &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="0">No &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="2">N/A</mat-radio-button>
+                    <mat-error class="error-message"
+                      *ngIf="RequestForm.get('floatLabel95').invalid && RequestForm.get('floatLabel95').touched">Please
+                      Select
+                    </mat-error>
+                  </mat-radio-group>
+                </div>
+
+                <div class="hotwork-sub">
+                  <label>Flushing approved?</label>
+                  <mat-radio-group formControlName="floatLabel96"
+                    [class.is-invalid]="RequestForm.get('floatLabel96').invalid && RequestForm.get('floatLabel96').touched">
+                    <mat-radio-button [value]="1">Yes &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="0">No &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="2">N/A</mat-radio-button>
+                    <mat-error class="error-message"
+                      *ngIf="RequestForm.get('floatLabel96').invalid && RequestForm.get('floatLabel96').touched">Please
+                      Select
+                    </mat-error>
+                  </mat-radio-group>
+                </div>
+
+                <div class="hotwork-sub">
+                  <label>MC approved? (MC number Required)</label>
+                  <mat-radio-group formControlName="floatLabel97"
+                    [class.is-invalid]="RequestForm.get('floatLabel97').invalid && RequestForm.get('floatLabel97').touched">
+                    <mat-radio-button [value]="1">Yes &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="0">No &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="2">N/A</mat-radio-button>
+                    <mat-error class="error-message"
+                      *ngIf="RequestForm.get('floatLabel97').invalid && RequestForm.get('floatLabel97').touched">Please
+                      Select
+                    </mat-error>
+                  </mat-radio-group>
+                </div>
+
+                <div class="hotwork-sub">
+                  <label>Walkdown with Visual inspection performed?</label>
+                  <mat-radio-group formControlName="floatLabel98"
+                    [class.is-invalid]="RequestForm.get('floatLabel98').invalid && RequestForm.get('floatLabel98').touched">
+                    <mat-radio-button [value]="1">Yes &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="0">No &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="2">N/A</mat-radio-button>
+                    <mat-error class="error-message"
+                      *ngIf="RequestForm.get('floatLabel98').invalid && RequestForm.get('floatLabel98').touched">Please
+                      Select
+                    </mat-error>
+                  </mat-radio-group>
+                </div>
+
+                <div class="hotwork-sub">
+                  <label>LOTO plan approved and installed by LOTO officer?</label>
+                  <mat-radio-group formControlName="floatLabel99"
+                    [class.is-invalid]="RequestForm.get('floatLabel99').invalid && RequestForm.get('floatLabel99').touched">
+                    <mat-radio-button [value]="1">Yes &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="0">No &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="2">N/A</mat-radio-button>
+                    <mat-error class="error-message"
+                      *ngIf="RequestForm.get('floatLabel99').invalid && RequestForm.get('floatLabel99').touched">Please
+                      Select
+                    </mat-error>
+                  </mat-radio-group>
+                </div>
+
+                <div class="hotwork-sub">
+                  <label>Ensure Safety Valves follow Media Code?</label>
+                  <mat-radio-group formControlName="floatLabel100"
+                    [class.is-invalid]="RequestForm.get('floatLabel100').invalid && RequestForm.get('floatLabel100').touched">
+                    <mat-radio-button [value]="1">Yes &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="0">No &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="2">N/A</mat-radio-button>
+                    <mat-error class="error-message"
+                      *ngIf="RequestForm.get('floatLabel100').invalid && RequestForm.get('floatLabel100').touched">Please
+                      Select
+                    </mat-error>
+                  </mat-radio-group>
+                </div>
+                <div class="hotwork-sub">
+                  <label>C&Q Safety signs are in place?</label>
+                  <mat-radio-group formControlName="floatLabel101"
+                    [class.is-invalid]="RequestForm.get('floatLabel101').invalid && RequestForm.get('floatLabel101').touched">
+                    <mat-radio-button [value]="1">Yes &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="0">No &nbsp;&nbsp;</mat-radio-button>
+                    <mat-radio-button [value]="2">N/A</mat-radio-button>
+                    <mat-error class="error-message"
+                      *ngIf="RequestForm.get('floatLabel101').invalid && RequestForm.get('floatLabel101').touched">Please
+                      Select
+                    </mat-error>
+                  </mat-radio-group>
+                </div>
+              </section>
+            </mat-grid-tile>
+
+
+          </mat-grid-list>
+
+          <!-- Pressurization  ends -->
+
+
 
           <!-- ended new fields -->
 
